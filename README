@@ -1,0 +1,260 @@
+/*
+This API use a mongodb created in https://mlab.com site and we have GET function to
+show all the database content, POST to save a record (req={title:x, body:y}).
+DELETE to delete a record.
+PUT to modify a record.
+*/
+
+
+
+SETUP A MONGODB database IN YOUR SYSTEM
+-------------------------------------
+
+install MongoDB in your system:
+> sudo apt-get remove mongodb-org
+> sudo apt-get install mongodb
+
+Create the service config file as shown below:
+
+> cd /lib/systemd/system
+> sudo touch mongodb.service
+> sudo nano mongodb.service
+[Unit]
+Description=An object/document-oriented database
+Documentation=man:mongod(1)
+After=network.target
+
+[Service]
+User=mongodb
+Group=mongodb
+ExecStart=/usr/bin/mongod --quiet --config /etc/mongodb.conf
+
+[Install]
+WantedBy=multi-user.target
+
+Verify in the list if the service is enabled or disabled using the command below:
+
+> systemctl list-unit-files --type=service
+...
+mongodb.service             disabled
+...
+
+
+If it is disabled or not in the list, enable it:
+
+> sudo systemctl enable mongodb.service
+
+
+Check again:
+
+> systemctl list-unit-files --type=service 
+...
+mongodb.service             enabled
+...
+
+Now you can managing the service on SystemD init process:
+
+> systemctl status mongodb
+> sudo systemctl stop mongodb
+> sudo systemctl start mongodb
+> sudo systemctl restart mongodb
+
+Enjoy!
+
+Agora já temos o MongoDB instalado num computador qualquer(servidor), neste casa a gente instalou ele na mesma maquina qua a gente está desenvolvido.
+
+verify the mongodb version: 
+"mongod --version"
+
+========
+
+//To stop the server of the database do:
+sudo systemctl stop mongod.service
+
+//To start the server of the database do:
+sudo systemctl start mongod.service
+
+//To enable the server of the database do:
+sudo systemctl enable mongod.service
+
+CREATE A MONGO DB DATABASE FROM THE SITE  (https://mlab.com)
+------------------------------------------------------------
+
+go to:
+https://mlab.com/
+create an acount 
+Account name: xxx
+email: cherie@gmail.com
+username:yyyy
+Password:zzzzz
+
+click in "create New" (MongoDB Deployments)
+choose "Sanbox" (because is free) -> "continue", choose "Us East" --> continue, 
+the database name:xxxx --> continue --> "submit order".
+
+To create a user for the database , click into the database name and click into "Add database user"
+
+Database username: xxx
+Password: xxxx
+--> create
+
+now copy this link
+mongodb://<dbuser>:<dbpassword>@ds113693.mlab.com:13693/jr_testdb 
+
+ goto the onfig folder and open the db.js file and put this content:
+
+db.js
+-----
+//é assim exporta um variavel/atributo(url)
+module.exports={
+	url:"mongodb://username:password@ds113693.mlab.com:13693/jr_testdb"
+}
+
+
+
+
+RUN the APP and MONGODB
+-----------------------
+1) Verify if the database is running ou active:
+$ systemctl status mongodb
+
+
+if not Run the database in your system:
+$sudo service mongodb start
+
+
+2) run app:
+npm run dev
+
+===
+
+INSTALL POSTMAN SOFTWARE IN YOUR SYSTEM
+----------------------------------------
+Postman is a software used to do POST/GET/PUT...request to an API.
+Postman is nothing but a browser more complex means a browser where you can find more information.
+it represent the client to comunicate to the server.
+
+https://www.youtube.com/watch?v=FjgYtQK_zLE
+
+
+install postman
+-----------------
+go to "ubunto software" and serch for "postman" and install it.
+
+
+API ENDPOINT
+------------
+
+GET       /notes/id   busca um note pelo id
+POST      /notes  criar um note
+DELETE   /notes/id   deletar um note pelo id
+PUT      /notes/id  alterar um note pelo id
+
+
+Open o "Postman"
+
+file -->new 
+let's add a colection in the database using Postman,and select POST and put the
+url "http://localhost:3000/notes/" select "body" (because the post() function dont use parameter) and select "x-www-form-urlencoded".
+NB) we select "x-www-form-urlencoded" because no server.js file we had an unstruction to 
+undestand this format and the postman is configurad to this format, where his configure
+ç
+like this:
+header
+-------------------------------------------------
+Content-Type  | application/x-www-form-urlencoded
+--------------------------------------------------
+
+if we want to configure it for json is like this:
+header
+-------------------------------------------------
+Content-Type  | application/json
+--------------------------------------------------
+
+
+key                               |         value               | description
+------------------------------------------------------------------------------
+title                                    My note Title
+------------------------------------------------------------------------------
+body                                     What a great note
+------------------------------------------------------------------------------
+
+NB) as we can see we create an object like that:
+ req= {title:"My note Title",body: "What a great note"}
+
+e escolhe o formato JSON
+
+o resutlado retornr pelo servidor para o software Postman é assim:
+
+{
+    "text": "What a great note",
+    "title": "My note Title",
+    "_id": "5c30e6d1adc9d5705fc6bf81"
+}
+
+Se vc for la no site do mlab.com, na sua conta vc vai ver a colllection "notes" foi criado.
+
+Agora a gente já armazena o request no banco de dado, onde cada request possui um id automaticamente.
+Agora como podemos procurar um request armazenado no banco de dado pelo este id?
+localhost:3000/notes/id
+exepmlo:
+localhost:3000/notes/5d45daa2ec71673d536fba06
+
+Bingo!!!!
+
+para testar abrir seu browser e colocar este link:
+http://localhost:3000/notes/5c30e6d1adc9d5705fc6bf81
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+CREATE A DATABASE FROM MONGODB USING Compass
+--------------------------------------------
+download mongodb-compass:
+wget https://downloads.mongodb.com/compass/mongodb-compass_1.15.1_amd64.deb
+
+install mongodb-compass in your system:
+sudo dpkg -i mongodb-compass_1.15.1_amd64.deb
+
+
+before run compass to create a database ,MongoDB have to be active or running:
+Verify if the database is running ou active:
+$ systemctl status mongodb
+
+
+if not Run the database in your system:
+$sudo service mongodb start
+
+Start Compass:
+$ mongodb-compass
+
+and connect the MongoDB to create the database:
+Hostname: localhost
+Port: 27017
+
+e clique em "connect"
+
+Clique em "Create Database"
+Database Name:jr_testdb
+Collection Name: notes 
+Clique em "Create Database"
